@@ -6,8 +6,8 @@ import { currentUser } from "@clerk/nextjs/server";
 export default async function Home() {
 
     const result = await fetchPosts(1, 30);
-    const user = currentUser();
-    if (!user) return null; // to avoid typescript warnings
+    const user = await currentUser();
+    if (!user) return null;
 
 
     return (
