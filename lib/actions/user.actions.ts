@@ -179,7 +179,7 @@ export async function addFollowerToUser(userId: string, followerId: string) {
       throw new Error("Follower not found");
     }
 
-    if(userId === followerId){
+    if (userId === followerId) {
       throw new Error("User cannot follow itself");
     }
 
@@ -238,5 +238,25 @@ export async function deleteFollowers(userId: string, followerId: string) {
     return { message: "Follower removed successfully" };
   } catch (error: any) {
     throw new Error(`Error in unfollowing the user ${error.message}`);
+  }
+}
+
+export async function getFollowersDetails(userId: string) {
+  connectToDB();
+  try {
+    const originalUser = await User.findOne({ id: userId });
+    if (!originalUser) {
+      throw new Error("User not found");
+    }
+
+    const followers = originalUser.followers;
+
+    const users = await User.find({
+      id: { $in: followers }
+    });
+
+    return { message: "Followers details fetched successfully", followers: users};
+  } catch (error: any) {
+    throw new Error(`Error in fetching followers details ${error.message}`);
   }
 }

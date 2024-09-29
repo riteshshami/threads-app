@@ -1,17 +1,32 @@
 "use client";
 
 import Image from "next/image";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "../ui/button";
 import {
   addFollowerToUser,
   deleteFollowers,
   getFollowers,
+  getFollowersDetails,
 } from "@/lib/actions/user.actions";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 interface Props {
-  accountId: string; // The user whose profile is being viewed
-  authUserId: string; // The currently logged-in user
+  accountId: string;
+  authUserId: string;
   name: string;
   username: string;
   imgUrl: string;
@@ -29,6 +44,7 @@ const ProfileHeader = ({
   const [followers, setFollowers] = useState<any[]>([]); // State to store the followers
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isFollowing, setIsFollowing] = useState<boolean>(false); // Track if authUserId is following accountId
+  const [followerDetails, setFollowerDetails] = useState<any[]>([]);
 
   // Fetch followers when the component mounts
   useEffect(() => {
@@ -51,7 +67,21 @@ const ProfileHeader = ({
       }
     };
 
+    const fetchFollowersDetails = async () => {
+      setIsLoading(true);
+      try {
+        const result = await getFollowersDetails(accountId);
+        console.log("Result", result);
+        setFollowerDetails(result.followers as Object[]);
+      } catch (error) {
+        console.error("Error fetching followers details:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     fetchFollowers();
+    fetchFollowersDetails();
   }, [accountId, authUserId]);
 
   // Handle follow/unfollow button click
@@ -110,9 +140,48 @@ const ProfileHeader = ({
             <h2 className="text-center text-heading1-bold text-light-1">
               {followers.length}
             </h2>
-            <p className="text-base-regular text-center text-gray-1">
-              {followers.length > 1 ? "Followers" : "Follower"}
-            </p>
+            <Dialog>
+              <DialogTrigger asChild>
+                <p className="text-base-regular text-center text-gray-1 cursor-pointer">
+                  Followers
+                </p>
+              </DialogTrigger>
+              <DialogContent className="bg-dark-2 text-gray-1">
+                <DialogHeader>
+                  <DialogTitle>Followers</DialogTitle>
+                </DialogHeader>
+                <div>
+                  <Table>
+                    <TableBody>
+                      {followerDetails.map((detail) => (
+                        <TableRow className="hover:bg-dark-4">
+                          <TableCell className="font-medium">
+                            <Image
+                              src={detail.image}
+                              alt="Profile Picture"
+                              width={50}
+                              height={50}
+                              className="rounded-full object-cover"
+                            />
+                          </TableCell>
+                          <TableCell className="text-heading4-medium">{detail.name}</TableCell>
+                          <TableCell className="text-right">
+                            <Button>
+                              <Link
+                                key={detail._id}
+                                href={`/profile/${detail.id}`}
+                              >
+                                View
+                              </Link>
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       )}
