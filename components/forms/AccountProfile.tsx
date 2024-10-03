@@ -37,19 +37,7 @@ interface Props {
 const AccountProfile = ({ user, btnTitle }: Props) => {
 
   const [files, setFiles] = useState<File[]>([])  
-  const { startUpload } = useUploadThing("media",
-    {
-      onClientUploadComplete: () => {
-        alert("uploaded successfully!");
-      },
-      onUploadError: () => {
-        alert("error occurred while uploading");
-      },
-      onUploadBegin: () => {
-        alert("upload has begun");
-      },
-    },
-  );
+  const { startUpload } = useUploadThing("media");
   const router = useRouter();
   const pathname = usePathname();
 
